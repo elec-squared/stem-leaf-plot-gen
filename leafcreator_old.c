@@ -15,42 +15,38 @@ int main(int argc, char *argv[]) {
   int right_to_left = 0;
   int no_stem = 0;
   int stem_num_begin = 0;
-  int datastr_index = -1;
-  int ptcount = 0;
 
   for (int i = 0; i < argc; i++) {
-    if (argv[i][0] != '-') {
-      datastr_index = i;
-    }
     if (strcmp(argv[i], "-r") == 0) {
       right_to_left = 1;
     }
     if (strcmp(argv[i], "-h") == 0) {
       no_stem = 1;
     }
-    if (strcmp(argv[i], "-c") == 0
-      && i+1 < argc) {
-      ptcount = atoi(argv[++i]);
-    }
   }
   
-  if (datastr_index < 0 || argc <= 1) {
-    printf("stem-leaf plot creator: 23:25 -> 2 | 3 5 ");
-    printf("\ninclude parameter -r for stem on RIGHT and leaves on LEFT");
-    printf("\ninclude parameter -h to omit/hide stem in output");
-    printf("\n**needs** parameter -c [data element count]");
-    printf("\nsplit elements in data with ':'\n");
-    return 0;
-  }
+  printf("stem-leaf plot creator: 23:25 -> 2 | 3 5 ");
+  printf("\ninclude parameter -r for stem on RIGHT and leaves on LEFT");
+  printf("\ninclude parameter -h to omit/hide stem in output");
+  // TODO: add R to L mode
 
+  // collect data will be unsorted.
+  int ptcount = 0;
+  printf("\ndata point quantity: ");
+  scanf("%d", &ptcount);
+  
   int* data = (int *) malloc(ptcount * sizeof (int));
-  int* datastem = (int *) malloc(ptcount * sizeof (int)); 
-
+  int* datastem = (int *) malloc(ptcount * sizeof (int));  
+  char datastring[ptcount*4];
+ 
+  printf("Insert data to parse into stem (tens-ones)- split with `:'\n>");
+  scanf("%s", datastring);
+  
   char* token;
   int fart = 0;
   int i;
   int j;
-  token = strtok(argv[datastr_index], ":");
+  token = strtok(datastring, ":");
   for (i = 0; i < ptcount; i++) {
     fart = atoi(token);
     data[i] = fart;
