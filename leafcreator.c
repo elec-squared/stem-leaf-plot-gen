@@ -102,9 +102,11 @@ int main(int argc, char *argv[]) {
   // ternary bool ? r-l : l-r
   for (i = 0; i <= datastem[ptcount-1]; i++) {
     if (!no_stem && !right_to_left) printf("%d | ", i);
-    for (j = (right_to_left ? ptcount-1 : 0); 
-      (right_to_left ? j >= 0 : j < ptcount);
-      j += (right_to_left ? -1 : 1)) {
+//         (right_to_left ? ptcount-1 : 0)  
+    for (j = (ptcount-1)*right_to_left; 
+      right_to_left ? j >= 0 : j < ptcount;
+//         (right_to_left ? -1 : 1)   
+      j += 1-2*right_to_left) {
       if (sl_matrix[i][j] < 10 && sl_matrix[i][j] >= 0)
         printf("%d ", sl_matrix[i][j]);
     }
