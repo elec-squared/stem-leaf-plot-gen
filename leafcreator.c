@@ -9,6 +9,16 @@
 int cmpfunc (const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
 }
+	
+int print_help() {
+  printf("stem-leaf plot creator: 23:25 -> 2 | 3 5 ");
+  printf("\ninclude parameter -r for stem on RIGHT and leaves on LEFT");
+  printf("\ninclude parameter -n to omit/hide stem in output");
+  printf("\ninclude parameter -h to show help message");
+  printf("\n**needs** parameter -c [data element count]");
+  printf("\nsplit elements in data with ':'\n");
+  return 0;
+}
 
 int main(int argc, char *argv[]) {
   // output style variables
@@ -19,13 +29,17 @@ int main(int argc, char *argv[]) {
   int ptcount = 0;
 
   for (int i = 0; i < argc; i++) {
+    if (strcmp(argv[i], "-h") == 0) {
+      print_help();
+      return 0;
+    }
     if (argv[i][0] != '-') {
       datastr_index = i;
     }
     if (strcmp(argv[i], "-r") == 0) {
       right_to_left = 1;
     }
-    if (strcmp(argv[i], "-h") == 0) {
+    if (strcmp(argv[i], "-n") == 0) {
       no_stem = 1;
     }
     if (strcmp(argv[i], "-c") == 0
@@ -35,11 +49,7 @@ int main(int argc, char *argv[]) {
   }
   
   if (datastr_index < 0 || argc <= 1) {
-    printf("stem-leaf plot creator: 23:25 -> 2 | 3 5 ");
-    printf("\ninclude parameter -r for stem on RIGHT and leaves on LEFT");
-    printf("\ninclude parameter -h to omit/hide stem in output");
-    printf("\n**needs** parameter -c [data element count]");
-    printf("\nsplit elements in data with ':'\n");
+    print_help();
     return 0;
   }
 
