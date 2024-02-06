@@ -69,17 +69,15 @@ int main(int argc, char *argv[]) {
     token = strtok(NULL, ":");
   }
 
-  printf("Sorting... ");
+  // printf("Sorting... ");
   qsort(data, ptcount, sizeof(int), cmpfunc);
-  qsort(datastem, ptcount, sizeof(int), cmpfunc);
-  
-  // TODO: organize data into necessary tens stems and print
-  // do not forget R to L mode
-  // test after sort
+  qsort(datastem, ptcount, sizeof(int), cmpfunc); 
+  /*
   for (i = 0; i < ptcount; i++) {
     printf("%d ", data[i]);
   }
   printf("\n\n");
+  */
   
   // stem-leaf matrix: [stem][leafindex]
   // eg:
