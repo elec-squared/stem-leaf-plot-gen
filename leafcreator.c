@@ -11,7 +11,8 @@ int cmpfunc (const void * a, const void * b) {
 }
 	
 int print_help() {
-  printf("stem-leaf plot creator: 23:25 -> 2 | 3 5 ");
+  printf("stem-leaf plot generator: 23:25 -> 2 | 3 5 ");
+  printf("\nusage: slpg [data] -c [count] [-nr]");
   printf("\ninclude parameter -r for stem on RIGHT and leaves on LEFT");
   printf("\ninclude parameter -n to omit/hide stem in output");
   printf("\ninclude parameter -h to show help message");
