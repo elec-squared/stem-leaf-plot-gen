@@ -4,7 +4,7 @@
 #include <math.h>
 
 // Copyleft NORTRITECH CORPORATION
-
+// TODO: add support for stdin
 // if equal returns 0
 int cmpfunc (const void * a, const void * b) {
    return ( *(int*)a - *(int*)b );
