@@ -59,23 +59,28 @@ int main(int argc, char *argv[]) {
   if (datastr_index == -2) {
     // printf("No data string in arguments found\n");
     datastr_index = -1;
-    stdin_buffer = malloc(30);
-    i = 0;
+    size_t bsize = 16;
+    stdin_buffer = malloc(bsize); 
+    i = 0; // position in stdin_buffer
     while (!feof(stdin)) {
-      if (++i%30 == 29) {
-        char* temp_sb_pt = realloc(stdin_buffer, i+30);
-        if (temp_sb_pt == NULL) {
-          fprintf(stderr, "Could not allocate memory to continue reading");
-          break;
-        }
+      // printf("i: %d\n", i);
+      // printf("i+bsize: %d\n", i+bsize);
+      char* temp_sb_pt = realloc(stdin_buffer, (size_t) i + bsize);
+      if (temp_sb_pt == NULL) {
+        fprintf(stderr, "Could not allocate memory to continue reading");
+        break;
+      } else {
         stdin_buffer = temp_sb_pt;
       }
-      fread(stdin_buffer, sizeof(stdin_buffer), 1, stdin);
-      // printf("%d", i);
+      // printf("sizeof stdin_buffer: %d\n", i+bsize);
+      //                 * pointer  addition 
+      fread(stdin_buffer + i, bsize, 1, stdin);
+      i += bsize;
     }
   }
 
   char* datastr = (datastr_index == -1) ? stdin_buffer : argv[datastr_index];
+  // printf("%s\n", datastr);
 
   if (datastr_index == -2 /* || argc <= 1 */) {
     print_help();
@@ -88,8 +93,8 @@ int main(int argc, char *argv[]) {
   }
   ptcount++;
 
-  int* data = (int *) malloc(ptcount * sizeof (int));
-  int* datastem = (int *) malloc(ptcount * sizeof (int)); 
+  int* data = malloc(ptcount * sizeof (int));
+  int* datastem = malloc(ptcount * sizeof (int)); 
 
   char* token;
   int fart = 0;
