@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
         || strcmp(argv[i], "--help") == 0) {
       print_help();
       return 0;
-    
+    } 
     if (argv[i][0] != '-') {
       // if data is argument
       datastr_index = i;
