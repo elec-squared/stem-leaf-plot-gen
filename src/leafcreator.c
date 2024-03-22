@@ -6,12 +6,16 @@
 // Copyleft NORTRITECH CORPORATION
 // TODO: add support for stdin
 // if equal returns 0
-int cmpfunc (const void * _a, const void * _b) {
+int cmpfunc(const void * _a, const void * _b) {
    float a = *(float*)_a;
    float b = *(float*)_b;
    float diff = a-b;
    return fabs(diff) < 0.00005 ?
      0 : (int)roundf(diff/fabs(diff)); // pos/pos = 1, pos/neg = -1
+}
+
+int cmpfunc_int(const void *a, const void *b) {
+  return ( *(int*)a - *(int*)b );
 }
 	
 int print_help() {
@@ -125,7 +129,7 @@ int main(int argc, char *argv[]) {
 
   // printf("Sorting... ");
   qsort(data, ptcount, sizeof(float), cmpfunc);
-  qsort(datastem, ptcount, sizeof(int), cmpfunc); 
+  qsort(datastem, ptcount, sizeof(int), cmpfunc_int); 
   
   // print warning if starting stem cuts off data
   if (data[0] < stem_num_begin * factor) {
