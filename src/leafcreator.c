@@ -168,8 +168,17 @@ int main(int argc, char *argv[]) {
       right_to_left ? j >= 0 : j < ptcount;
 //         (right_to_left ? -1 : 1)   
       j += 1-2*right_to_left) {
-      if (sl_matrix[i][j] < factor && sl_matrix[i][j] >= 0)
-        printf(print_dec ? "%3.1f " : "%1.0f ", sl_matrix[i][j]);
+      if (sl_matrix[i][j] < factor && sl_matrix[i][j] >= 0) {
+        // e.g. for factor 100, need 2 digits: 1 | 00 02 04   
+        int leaf_digits = (int)log10(factor);
+        char leaf_format_str[strlen("%.?f ") + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
+        // %x.yf:
+        // x is total digits (all digits left of decimal point, the point itself, all digits right of point)
+        // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
+        // x = print_dec * 2
+        sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + print_dec*2, print_dec);
+        printf(leaf_format_str, sl_matrix[i][j]);
+      }
     }
     if (!no_stem && right_to_left) printf("| %d", i + stem_num_begin);
     printf("\n");
