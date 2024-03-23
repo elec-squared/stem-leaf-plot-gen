@@ -28,6 +28,6 @@ Print a stem leaf plot with starting stem 1, displayed as integers <br />
 Print a stem leaf plot with stem as hundreds place, displayed as decimals <br />
 `slpg -d -f 100 203:104:116:102`
 ```
-1 | 2.0 4.0 16.0
-2 | 3.0
+1 | 02.0 04.0 16.0
+2 | 03.0
 ```
