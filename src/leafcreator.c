@@ -26,6 +26,7 @@ int print_help() {
   printf("\n -n to omit/hide stem in output");
   printf("\n -h to show help message");
   printf("\n -d to print leaf values as decimal (e.g. 2 | 1.2)");
+  printf("\n -k [sample num] to print a key at the end (e.g. Key: 1 | 2 = 12)");
   printf("\n -f [num]: change factor of stem (e.g. 10: tens place in stem)");
   printf("\n -s [num]: change starting stem\n");
   return 0;
@@ -37,10 +38,11 @@ int main(int argc, char *argv[]) {
   int NO_STEM = 0;       // -n
   int PRINT_HELP = 0;    // -h
   int PRINT_DEC = 0;     // -d
+  // -1: don't print key
+  int KEY_NUM = -1;      // -k
   int STEM_NUM_BEGIN = 0;// -s
-  // -1: stdin
-  // -2: none
-  int datastr_index = -2;
+  // -1: none in args (get from stdin)
+  int datastr_index = -1;
   int FACTOR = 10;       // -f
   int ptcount = 0;       // formerly -c
   int i;
@@ -104,9 +106,7 @@ int main(int argc, char *argv[]) {
 
   // if data is not in argument, get from stdin 
   char* stdin_buffer = NULL;
-  if (datastr_index == -2) {
-    // printf("No data string in arguments found\n");
-    datastr_index = -1;
+  if (datastr_index == -1) {
     size_t bsize = 16;
     stdin_buffer = malloc(bsize); 
     i = 0; // position in stdin_buffer
@@ -128,11 +128,6 @@ int main(int argc, char *argv[]) {
 
   char* datastr = (datastr_index == -1) ? stdin_buffer : argv[datastr_index];
   // printf("%s\n", datastr);
-
-  if (datastr_index == -2 /* || argc <= 1 */) {
-    print_help();
-    return 0;
-  }
 
   // find number of colons in string: # + 1 = ptcount
   for (i = 0; i < strlen(datastr); i++) {
