@@ -33,44 +33,72 @@ int print_help() {
 
 int main(int argc, char *argv[]) {
   // output style variables
-  int right_to_left = 0;
-  int no_stem = 0;
-  int print_dec = 0;
-  int stem_num_begin = 0;
+  int RIGHT_TO_LEFT = 0; // -r
+  int NO_STEM = 0;       // -n
+  int PRINT_HELP = 0;    // -h
+  int PRINT_DEC = 0;     // -d
+  int STEM_NUM_BEGIN = 0;// -s
   // -1: stdin
   // -2: none
   int datastr_index = -2;
-  int factor = 10;
-  int ptcount = 0;
+  int FACTOR = 10;       // -f
+  int ptcount = 0;       // formerly -c
   int i;
   int j;
   
   for (i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-h") == 0
-        || strcmp(argv[i], "--help") == 0) {
+    if (argv[i][0] != '-') {
+      datastr_index = i;
+      continue; // i's for loop
+    }
+
+    if (strlen(argv[i]) < 2) {
+      fprintf(stderr, "Invalid option at index %d\n", i);
+    }
+
+    char flags[] = "rnhd";
+    int* ftovar[] = {
+      &RIGHT_TO_LEFT,
+      &NO_STEM,
+      &PRINT_HELP,
+      &PRINT_DEC,
+      NULL
+    };
+
+    char optval[] = "fs"; // only options that take INTEGERS
+    char opttype[] = "ii"; // i = int, s = str (future?)
+    int* ovtovar[] = {
+      &FACTOR,
+      &STEM_NUM_BEGIN,
+      NULL
+    };
+
+    char* opt_char = strchr(optval, argv[i][1]);
+    if (opt_char != NULL) {
+      // parsing option with value
+      if (i+1 >= argc
+          || argv[i+1][0] == '-') {
+        fprintf(stderr, "Value expected for \"%s\", none found\n", argv[i]);
+        continue; // i's for loop
+      }
+      int var_index = opt_char - optval; 
+      *(ovtovar[var_index]) = atoi(argv[++i]);
+      continue; // done with this arg
+    }
+    // parsing flag(s) (switch 0 or 1)
+    for (j = 1; j < strlen(argv[i]); j++) {
+      char* flag_char = strchr(flags, argv[i][j]);
+      if (flag_char == NULL) {
+        fprintf(stderr, "\"%c\" not a flag, ignoring\n", argv[i][j]);
+        continue; // j's for loop
+      }
+      // printf("flag %c\nindex %ld", argv[i][j], flag_char - flags);
+      *(ftovar[flag_char - flags]) = 1;
+    }
+
+    if (PRINT_HELP) {
       print_help();
       return 0;
-    } 
-    if (argv[i][0] != '-') {
-      // if data is argument
-      datastr_index = i;
-    }
-    if (strcmp(argv[i], "-r") == 0) {
-      right_to_left = 1;
-    }
-    if (strcmp(argv[i], "-n") == 0) {
-      no_stem = 1;
-    }
-    if (strcmp(argv[i], "-d") == 0) {
-      print_dec = 1;
-    }
-    if (strcmp(argv[i], "-f") == 0 
-      && i+1 < argc) {
-      factor = atoi(argv[++i]);
-    }
-    if (strcmp(argv[i], "-s") == 0 
-      && i+1 < argc) {
-      stem_num_begin = atoi(argv[++i]);
     }
   }
 
@@ -89,9 +117,8 @@ int main(int argc, char *argv[]) {
       if (temp_sb_pt == NULL) {
         fprintf(stderr, "Could not allocate memory to continue reading");
         break;
-      } else {
-        stdin_buffer = temp_sb_pt;
       }
+      stdin_buffer = temp_sb_pt;
       // printf("sizeof stdin_buffer: %d\n", i+bsize);
       //                 * pointer  addition 
       fread(stdin_buffer + i, bsize, 1, stdin);
@@ -122,7 +149,7 @@ int main(int argc, char *argv[]) {
   for (i = 0; token != NULL; i++){
     fart = atof(token);
     data[i] = fart;
-    datastem[i] = (int)(fart / factor);
+    datastem[i] = (int)(fart / FACTOR);
     token = strtok(NULL, ":");
   }
   ptcount = i;
@@ -132,10 +159,10 @@ int main(int argc, char *argv[]) {
   qsort(datastem, ptcount, sizeof(int), cmpfunc_int); 
   
   // print warning if starting stem cuts off data
-  if (data[0] < stem_num_begin * factor) {
+  if (data[0] < STEM_NUM_BEGIN * FACTOR) {
     fprintf(stderr,
         "WARNING: smallest data point %.1f is lower than minimum %d\n",
-        data[0], stem_num_begin*factor);
+        data[0], STEM_NUM_BEGIN*FACTOR);
   }
 
   // stem-leaf matrix: [stem][leafindex]
@@ -145,15 +172,15 @@ int main(int argc, char *argv[]) {
   // stem_num_begin -> maxstem (below applied stem_num_begin offset to start at 0)
   // i iterates 0 -> maxstem - stem_num_begin
   float sl_matrix[datastem[ptcount-1]+1][ptcount];
-  for (i = 0; i <= datastem[ptcount-1] - stem_num_begin; i++) {
+  for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
     for (j=0;j < ptcount;j++){
       sl_matrix[i][j]= -1.0;
     }
   }
   int current_leaf_no = 0;
   for (i = 0; i < ptcount; i++) {
-    sl_matrix[datastem[i] - stem_num_begin][current_leaf_no]
-      = fmodf(data[i], (float)factor);
+    sl_matrix[datastem[i] - STEM_NUM_BEGIN][current_leaf_no]
+      = fmodf(data[i], (float)FACTOR);
     if (i < ptcount-1) {
       if (datastem[i+1]==datastem[i]) current_leaf_no++;
       else current_leaf_no = 0;
@@ -161,26 +188,26 @@ int main(int argc, char *argv[]) {
   }
   
   // ternary bool ? r-l : l-r
-  for (i = 0; i <= datastem[ptcount-1] - stem_num_begin; i++) {
-    if (!no_stem && !right_to_left) printf("%d | ", i + stem_num_begin);
+  for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
+    if (!NO_STEM && !RIGHT_TO_LEFT) printf("%d | ", i + STEM_NUM_BEGIN);
 //         (right_to_left ? ptcount-1 : 0)  
-    for (j = (ptcount-1)*right_to_left; 
-      right_to_left ? j >= 0 : j < ptcount;
+    for (j = (ptcount-1)*RIGHT_TO_LEFT; 
+      RIGHT_TO_LEFT ? j >= 0 : j < ptcount;
 //         (right_to_left ? -1 : 1)   
-      j += 1-2*right_to_left) {
-      if (sl_matrix[i][j] < factor && sl_matrix[i][j] >= 0) {
+      j += 1-2*RIGHT_TO_LEFT) {
+      if (sl_matrix[i][j] < FACTOR && sl_matrix[i][j] >= 0) {
         // e.g. for factor 100, need 2 digits: 1 | 00 02 04   
-        int leaf_digits = (int)log10(factor);
+        int leaf_digits = (int)log10(FACTOR);
         char leaf_format_str[strlen("%.?f ") + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
         // %x.yf:
         // x is total digits (all digits left of decimal point, the point itself, all digits right of point)
         // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
         // x = print_dec * 2
-        sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + print_dec*2, print_dec);
+        sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + PRINT_DEC*2, PRINT_DEC);
         printf(leaf_format_str, sl_matrix[i][j]);
       }
     }
-    if (!no_stem && right_to_left) printf("| %d", i + stem_num_begin);
+    if (!NO_STEM && RIGHT_TO_LEFT) printf("| %d", i + STEM_NUM_BEGIN);
     printf("\n");
   }
   
