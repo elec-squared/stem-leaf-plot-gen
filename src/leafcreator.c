@@ -67,11 +67,12 @@ int main(int argc, char *argv[]) {
       NULL
     };
 
-    char optval[] = "fs"; // only options that take INTEGERS
-    char opttype[] = "ii"; // i = int, s = str (future?)
+    char optval[] = "fsk"; // only options that take INTEGERS
+    char opttype[] = "iii"; // i = int, s = str (future?)
     int* ovtovar[] = {
       &FACTOR,
       &STEM_NUM_BEGIN,
+      &KEY_NUM,
       NULL
     };
 
@@ -182,6 +183,14 @@ int main(int argc, char *argv[]) {
     }
   }
   
+  // e.g. for factor 100, need 2 digits: 1 | 00 02 04   
+  // %x.yf:
+  // x is total digits (all digits left of decimal point, the point itself, all digits right of point)
+  // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
+  // x = print_dec * 2
+  int leaf_digits = (int)log10(FACTOR);
+  char leaf_format_str[strlen("%.?f ") + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
+
   // ternary bool ? r-l : l-r
   for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
     if (!NO_STEM && !RIGHT_TO_LEFT) printf("%d | ", i + STEM_NUM_BEGIN);
@@ -191,19 +200,22 @@ int main(int argc, char *argv[]) {
 //         (right_to_left ? -1 : 1)   
       j += 1-2*RIGHT_TO_LEFT) {
       if (sl_matrix[i][j] < FACTOR && sl_matrix[i][j] >= 0) {
-        // e.g. for factor 100, need 2 digits: 1 | 00 02 04   
-        int leaf_digits = (int)log10(FACTOR);
-        char leaf_format_str[strlen("%.?f ") + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
-        // %x.yf:
-        // x is total digits (all digits left of decimal point, the point itself, all digits right of point)
-        // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
-        // x = print_dec * 2
         sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + PRINT_DEC*2, PRINT_DEC);
         printf(leaf_format_str, sl_matrix[i][j]);
       }
     }
+    // "| %d" NOT " | %d" because the leafs printed will have a trailing space
     if (!NO_STEM && RIGHT_TO_LEFT) printf("| %d", i + STEM_NUM_BEGIN);
     printf("\n");
+  }
+
+  // print key/legend
+  if (KEY_NUM >= 0) {
+    printf("Key: ");
+    if (!RIGHT_TO_LEFT) printf("%d | ", (int)(KEY_NUM/FACTOR));
+    printf(leaf_format_str, fmodf(KEY_NUM, (float)FACTOR));
+    if (RIGHT_TO_LEFT) printf("| %d", (int)(KEY_NUM/FACTOR));
+    printf(" = %d\n", KEY_NUM);
   }
   
   // printf("NOTE: PLEASE check last row for accuracy-- it may contain extra numbers from garbage memory and I can't be bothered to fix it\n");
