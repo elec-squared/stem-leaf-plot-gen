@@ -1,10 +1,14 @@
+// SLPG (stem leaf plot generator)
+// Copyright (C) 2024 David Luz
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
-// Copyleft NORTRITECH CORPORATION
-// TODO: add support for stdin
+// latest change: generate legend/key
+// latest tweak: add version
+const char VERSION[] = "v1.5.1";
+
 // if equal returns 0
 int cmpfunc(const void * _a, const void * _b) {
    float a = *(float*)_a;
@@ -17,7 +21,7 @@ int cmpfunc(const void * _a, const void * _b) {
 int cmpfunc_int(const void *a, const void *b) {
   return ( *(int*)a - *(int*)b );
 }
-	
+
 int print_help() {
   printf("stem-leaf plot generator: 23:25 -> 2 | 3 5 ");
   printf("\nusage: slpg [data] [-nr] [-f factor]");
@@ -25,6 +29,7 @@ int print_help() {
   printf("\n -r for stem on RIGHT and leaves on LEFT");
   printf("\n -n to omit/hide stem in output");
   printf("\n -h to show help message");
+  printf("\n -v to print version information");
   printf("\n -d to print leaf values as decimal (e.g. 2 | 1.2)");
   printf("\n -k [sample num] to print a key at the end (e.g. Key: 1 | 2 = 12)");
   printf("\n -f [num]: change factor of stem (e.g. 10: tens place in stem)");
@@ -32,22 +37,30 @@ int print_help() {
   return 0;
 }
 
+int print_ver() {
+  printf("Stem-leaf plot generator (slpg) %s", VERSION);
+  printf("\n\nUses the GNU GPL-3.0 license");
+  printf("\nThis program comes with no warranty (see LICENSE for details)\n");
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
   // output style variables
-  int RIGHT_TO_LEFT = 0; // -r
-  int NO_STEM = 0;       // -n
-  int PRINT_HELP = 0;    // -h
-  int PRINT_DEC = 0;     // -d
+  int RIGHT_TO_LEFT  = 0; // -r
+  int NO_STEM        = 0; // -n
+  int PRINT_HELP     = 0; // -h
+  int PRINT_VER      = 0; // -v
+  int PRINT_DEC      = 0; // -d
   // -1: don't print key
-  int KEY_NUM = -1;      // -k
-  int STEM_NUM_BEGIN = 0;// -s
+  int KEY_NUM       = -1; // -k
+  int STEM_NUM_BEGIN = 0; // -s
   // -1: none in args (get from stdin)
   int datastr_index = -1;
-  int FACTOR = 10;       // -f
-  int ptcount = 0;       // formerly -c
+  int FACTOR        = 10; // -f
+  int ptcount        = 0; // formerly -c
   int i;
   int j;
-  
+
   for (i = 1; i < argc; i++) {
     if (argv[i][0] != '-') {
       datastr_index = i;
@@ -58,11 +71,12 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "Invalid option at index %d\n", i);
     }
 
-    char flags[] = "rnhd";
+    char flags[] = "rnhvd";
     int* ftovar[] = {
       &RIGHT_TO_LEFT,
       &NO_STEM,
       &PRINT_HELP,
+      &PRINT_VER,
       &PRINT_DEC,
       NULL
     };
@@ -84,7 +98,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Value expected for \"%s\", none found\n", argv[i]);
         continue; // i's for loop
       }
-      int var_index = opt_char - optval; 
+      int var_index = opt_char - optval;
       *(ovtovar[var_index]) = atoi(argv[++i]);
       continue; // done with this arg
     }
@@ -98,18 +112,23 @@ int main(int argc, char *argv[]) {
       // printf("flag %c\nindex %ld", argv[i][j], flag_char - flags);
       *(ftovar[flag_char - flags]) = 1;
     }
-
-    if (PRINT_HELP) {
-      print_help();
-      return 0;
-    }
   }
 
-  // if data is not in argument, get from stdin 
+  if (PRINT_HELP) {
+    print_help();
+  }
+  if (PRINT_VER) {
+    print_ver();
+  }
+  if (PRINT_HELP || PRINT_VER) {
+    return 0;
+  }
+
+  // if data is not in argument, get from stdin
   char* stdin_buffer = NULL;
   if (datastr_index == -1) {
     size_t bsize = 16;
-    stdin_buffer = malloc(bsize); 
+    stdin_buffer = malloc(bsize);
     i = 0; // position in stdin_buffer
     while (!feof(stdin)) {
       // printf("i: %d\n", i);
@@ -121,7 +140,7 @@ int main(int argc, char *argv[]) {
       }
       stdin_buffer = temp_sb_pt;
       // printf("sizeof stdin_buffer: %d\n", i+bsize);
-      //                 * pointer  addition 
+      //                 * pointer  addition
       fread(stdin_buffer + i, bsize, 1, stdin);
       i += bsize;
     }
@@ -137,7 +156,7 @@ int main(int argc, char *argv[]) {
   ptcount++;
 
   float* data = (float *) malloc(ptcount * sizeof (float));
-  int* datastem = (int* )malloc(ptcount * sizeof (int)); 
+  int* datastem = (int* )malloc(ptcount * sizeof (int));
 
   char* token;
   float fart = 0;
@@ -152,8 +171,8 @@ int main(int argc, char *argv[]) {
 
   // printf("Sorting... ");
   qsort(data, ptcount, sizeof(float), cmpfunc);
-  qsort(datastem, ptcount, sizeof(int), cmpfunc_int); 
-  
+  qsort(datastem, ptcount, sizeof(int), cmpfunc_int);
+
   // print warning if starting stem cuts off data
   if (data[0] < STEM_NUM_BEGIN * FACTOR) {
     fprintf(stderr,
@@ -182,8 +201,8 @@ int main(int argc, char *argv[]) {
       else current_leaf_no = 0;
     }
   }
-  
-  // e.g. for factor 100, need 2 digits: 1 | 00 02 04   
+
+  // e.g. for factor 100, need 2 digits: 1 | 00 02 04
   // %x.yf:
   // x is total digits (all digits left of decimal point, the point itself, all digits right of point)
   // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
@@ -194,10 +213,10 @@ int main(int argc, char *argv[]) {
   // ternary bool ? r-l : l-r
   for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
     if (!NO_STEM && !RIGHT_TO_LEFT) printf("%d | ", i + STEM_NUM_BEGIN);
-//         (right_to_left ? ptcount-1 : 0)  
-    for (j = (ptcount-1)*RIGHT_TO_LEFT; 
+//         (right_to_left ? ptcount-1 : 0)
+    for (j = (ptcount-1)*RIGHT_TO_LEFT;
       RIGHT_TO_LEFT ? j >= 0 : j < ptcount;
-//         (right_to_left ? -1 : 1)   
+//         (right_to_left ? -1 : 1)
       j += 1-2*RIGHT_TO_LEFT) {
       if (sl_matrix[i][j] < FACTOR && sl_matrix[i][j] >= 0) {
         sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + PRINT_DEC*2, PRINT_DEC);
@@ -217,7 +236,7 @@ int main(int argc, char *argv[]) {
     if (RIGHT_TO_LEFT) printf("| %d", (int)(KEY_NUM/FACTOR));
     printf(" = %d\n", KEY_NUM);
   }
-  
+
   // printf("NOTE: PLEASE check last row for accuracy-- it may contain extra numbers from garbage memory and I can't be bothered to fix it\n");
 
   free(data);
