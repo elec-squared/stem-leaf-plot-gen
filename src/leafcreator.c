@@ -69,6 +69,7 @@ int main(int argc, char *argv[]) {
 
     if (strlen(argv[i]) < 2) {
       fprintf(stderr, "Invalid option at index %d\n", i);
+      continue; // i's for loop
     }
 
     char flags[] = "rnhvd";
@@ -145,6 +146,7 @@ int main(int argc, char *argv[]) {
       i += bsize;
     }
   }
+
 
   char* datastr = (datastr_index == -1) ? stdin_buffer : argv[datastr_index];
   // printf("%s\n", datastr);
