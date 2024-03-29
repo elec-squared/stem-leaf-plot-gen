@@ -7,7 +7,56 @@
 
 // latest change: generate legend/key
 // latest tweak: add version
-const char VERSION[] = "v1.5.1";
+const char VERSION[] = "v1.6.0";
+
+// output style variables
+int RIGHT_TO_LEFT  = 0; // -r
+int NO_STEM        = 0; // -n
+int PRINT_HELP     = 0; // -h
+int PRINT_VER      = 0; // -v
+int PRINT_DEC      = 0; // -d
+// -1: don't print key
+int KEY_NUM       = -1; // -k
+int STEM_NUM_BEGIN = 0; // -s
+// -1: none in args (get from stdin)
+int datastr_index = -1;
+int FACTOR        = 10; // -f
+int ptcount        = 0; // formerly -c
+
+char flags[] = "rnhvd";
+// [flag #] [char #]
+char flags_full[6][24] = {
+  "--right-to-left",
+  "--no-stem",
+  "--help",
+  "--version",
+  "--decimal",
+  "",
+};
+int* ftovar[] = {
+  &RIGHT_TO_LEFT,
+  &NO_STEM,
+  &PRINT_HELP,
+  &PRINT_VER,
+  &PRINT_DEC,
+  NULL
+};
+
+char optval[] = "fsk"; // only options that take INTEGERS
+char opttype[] = "iii"; // i = int, s = str (future?)
+char optval_full[4][24] = {
+  "--factor",
+  "--starting-stem",
+  "--key",
+  "",
+};
+int* ovtovar[] = {
+  &FACTOR,
+  &STEM_NUM_BEGIN,
+  &KEY_NUM,
+  NULL
+};
+
 
 // if equal returns 0
 int cmpfunc(const void * _a, const void * _b) {
@@ -25,16 +74,16 @@ int cmpfunc_int(const void *a, const void *b) {
 
 int print_help() {
   printf("stem-leaf plot generator: 23:25 -> 2 | 3 5 ");
-  printf("\nusage: slpg [data] [-nr] [-f factor]");
+  printf("\nusage: slpg [data] options...");
   printf("\nsplit elements in data with ':'");
-  printf("\n -r for stem on RIGHT and leaves on LEFT");
-  printf("\n -n to omit/hide stem in output");
-  printf("\n -h to show help message");
-  printf("\n -v to print version information");
-  printf("\n -d to print leaf values as decimal (e.g. 2 | 1.2)");
-  printf("\n -k [sample num] to print a key at the end (e.g. Key: 1 | 2 = 12)");
-  printf("\n -f [num]: change factor of stem (e.g. 10: tens place in stem)");
-  printf("\n -s [num]: change starting stem\n");
+  printf("\n-r / --right-to-left:       stem on RIGHT and leaves on LEFT");
+  printf("\n-n / --no-stem              omit/hide stem in output");
+  printf("\n-h / --help                 show help message");
+  printf("\n-v / --version              print version information");
+  printf("\n-d / --decimal              format leaf values as decimal (e.g. 2 | 1.2)");
+  printf("\n-k / --key [sample num]     print a key at the end (e.g. Key: 1 | 2 = 12)");
+  printf("\n-f / --factor [num]         change factor of stem (e.g. 10: tens place in stem)");
+  printf("\n-s / --starting-stem [num]  change starting stem\n");
   return 0;
 }
 
@@ -46,21 +95,7 @@ int print_ver() {
 }
 
 int main(int argc, char *argv[]) {
-  // output style variables
-  int RIGHT_TO_LEFT  = 0; // -r
-  int NO_STEM        = 0; // -n
-  int PRINT_HELP     = 0; // -h
-  int PRINT_VER      = 0; // -v
-  int PRINT_DEC      = 0; // -d
-  // -1: don't print key
-  int KEY_NUM       = -1; // -k
-  int STEM_NUM_BEGIN = 0; // -s
-  // -1: none in args (get from stdin)
-  int datastr_index = -1;
-  int FACTOR        = 10; // -f
-  int ptcount        = 0; // formerly -c
-  int i;
-  int j;
+  int i, j;
 
   for (i = 1; i < argc; i++) {
     if (argv[i][0] != '-') {
@@ -73,28 +108,25 @@ int main(int argc, char *argv[]) {
       continue; // i's for loop
     }
 
-    char flags[] = "rnhvd";
-    int* ftovar[] = {
-      &RIGHT_TO_LEFT,
-      &NO_STEM,
-      &PRINT_HELP,
-      &PRINT_VER,
-      &PRINT_DEC,
-      NULL
-    };
-
-    char optval[] = "fsk"; // only options that take INTEGERS
-    char opttype[] = "iii"; // i = int, s = str (future?)
-    int* ovtovar[] = {
-      &FACTOR,
-      &STEM_NUM_BEGIN,
-      &KEY_NUM,
-      NULL
-    };
-
+    // full arg names
     char* opt_char = strchr(optval, argv[i][1]);
-    if (opt_char != NULL) {
-      // parsing option with value
+    if (argv[i][1] == '-') { 
+      // options with values
+      for (j = 0; j < sizeof(optval_full) / 24; j++) {
+        if (strcmp(optval_full[j], argv[i]) == 0) {
+          *(ovtovar[j]) = atoi(argv[++i]);
+          break; // out of j
+        }
+      }
+      // flags
+      for (j = 0; j < sizeof(flags_full) / 24; j++) {
+        if (strcmp(flags_full[j], argv[i]) == 0) {
+          *(ftovar[j]) = 1; 
+          break; // out of j
+        }
+      }
+      continue; // done with this arg; i's for loop
+    } else if (opt_char != NULL) { // option with one char
       if (i+1 >= argc
           || argv[i+1][0] == '-') {
         fprintf(stderr, "Value expected for \"%s\", none found\n", argv[i]);
@@ -102,9 +134,11 @@ int main(int argc, char *argv[]) {
       }
       int var_index = opt_char - optval;
       *(ovtovar[var_index]) = atoi(argv[++i]);
-      continue; // done with this arg
+
+      continue; // done with this arg; i's for loop
     }
-    // parsing flag(s) (switch 0 or 1)
+
+    // parsing flag(s) with one char (switch 0 or 1)
     for (j = 1; j < strlen(argv[i]); j++) {
       char* flag_char = strchr(flags, argv[i][j]);
       if (flag_char == NULL) {
@@ -183,12 +217,17 @@ int main(int argc, char *argv[]) {
         data[0], STEM_NUM_BEGIN*FACTOR);
   }
 
-  // stem-leaf matrix: [stem][leafindex]
+  // generate stem-leaf matrix: [stem][leafindex]
   // e.g. with stem_num_begin as 2
   // 0(2) | 1.0 2.1 3.0
   // 1(3) | 4.0 4.1 5.2
   // stem_num_begin -> maxstem (below applied stem_num_begin offset to start at 0)
   // i iterates 0 -> maxstem - stem_num_begin
+  if (FACTOR < 10) { // cannot continue as log10(FACTOR) would be less than 1
+                     // see code further ahead
+    fprintf(stderr, "ERROR: Factor is less than 10, aborting\n");
+    return -1;
+  }
   float sl_matrix[datastem[ptcount-1]+1][ptcount];
   for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
     for (j = 0; j < ptcount; j++){
