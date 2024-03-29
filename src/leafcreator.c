@@ -76,7 +76,7 @@ int print_help() {
   printf("stem-leaf plot generator: 23:25 -> 2 | 3 5 ");
   printf("\nusage: slpg [data] options...");
   printf("\nsplit elements in data with ':'");
-  printf("\n-r / --right-to-left:       stem on RIGHT and leaves on LEFT");
+  printf("\n-r / --right-to-left        stem on RIGHT and leaves on LEFT");
   printf("\n-n / --no-stem              omit/hide stem in output");
   printf("\n-h / --help                 show help message");
   printf("\n-v / --version              print version information");
