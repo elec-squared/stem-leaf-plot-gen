@@ -14,8 +14,9 @@ int cmpfunc(const void * _a, const void * _b) {
    float a = *(float*)_a;
    float b = *(float*)_b;
    float diff = a-b;
-   return fabs(diff) < 0.00005 ?
-     0 : (int)roundf(diff/fabs(diff)); // pos/pos = 1, pos/neg = -1
+   return fabs(diff) < 0.00005
+     ? 0
+     : (int)roundf(diff/fabs(diff)); // pos/pos = 1, pos/neg = -1
 }
 
 int cmpfunc_int(const void *a, const void *b) {
@@ -157,8 +158,8 @@ int main(int argc, char *argv[]) {
   }
   ptcount++;
 
-  float* data = (float *) malloc(ptcount * sizeof (float));
-  int* datastem = (int* )malloc(ptcount * sizeof (int));
+  float* data = (float*)malloc(ptcount * sizeof (float));
+  int* datastem = (int*)malloc(ptcount * sizeof (int));
 
   char* token;
   float fart = 0;
@@ -190,8 +191,8 @@ int main(int argc, char *argv[]) {
   // i iterates 0 -> maxstem - stem_num_begin
   float sl_matrix[datastem[ptcount-1]+1][ptcount];
   for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
-    for (j=0;j < ptcount;j++){
-      sl_matrix[i][j]= -1.0;
+    for (j = 0; j < ptcount; j++){
+      sl_matrix[i][j] = -1.0;
     }
   }
   int current_leaf_no = 0;
@@ -210,7 +211,8 @@ int main(int argc, char *argv[]) {
   // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
   // x = print_dec * 2
   int leaf_digits = (int)log10(FACTOR);
-  char leaf_format_str[strlen("%.?f ") + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
+  char leaf_format_str[strlen("%.?f ")
+    + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
 
   // ternary bool ? r-l : l-r
   for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
@@ -219,7 +221,7 @@ int main(int argc, char *argv[]) {
     for (j = (ptcount-1)*RIGHT_TO_LEFT;
       RIGHT_TO_LEFT ? j >= 0 : j < ptcount;
 //         (right_to_left ? -1 : 1)
-      j += 1-2*RIGHT_TO_LEFT) {
+      j += 1 - 2*RIGHT_TO_LEFT) {
       if (sl_matrix[i][j] < FACTOR && sl_matrix[i][j] >= 0) {
         sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + PRINT_DEC*2, PRINT_DEC);
         printf(leaf_format_str, sl_matrix[i][j]);
