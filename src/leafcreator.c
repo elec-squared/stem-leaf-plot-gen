@@ -33,7 +33,7 @@ char flags_full[6][24] = {
   "--decimal",
   "",
 };
-int* ftovar[] = {
+int *ftovar[] = {
   &RIGHT_TO_LEFT,
   &NO_STEM,
   &PRINT_HELP,
@@ -50,7 +50,7 @@ char optval_full[4][24] = {
   "--key",
   "",
 };
-int* ovtovar[] = {
+int *ovtovar[] = {
   &FACTOR,
   &STEM_NUM_BEGIN,
   &KEY_NUM,
@@ -109,7 +109,7 @@ int main(int argc, char *argv[]) {
     }
 
     // full arg names
-    char* opt_char = strchr(optval, argv[i][1]);
+    char *opt_char = strchr(optval, argv[i][1]);
     if (argv[i][1] == '-') { 
       // options with values
       for (j = 0; j < sizeof(optval_full) / 24; j++) {
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
     // parsing flag(s) with one char (switch 0 or 1)
     for (j = 1; j < strlen(argv[i]); j++) {
-      char* flag_char = strchr(flags, argv[i][j]);
+      char *flag_char = strchr(flags, argv[i][j]);
       if (flag_char == NULL) {
         fprintf(stderr, "\"%c\" not a flag, ignoring\n", argv[i][j]);
         continue; // j's for loop
@@ -161,7 +161,7 @@ int main(int argc, char *argv[]) {
   }
 
   // if data is not in argument, get from stdin
-  char* stdin_buffer = NULL;
+  char *stdin_buffer = NULL;
   if (datastr_index == -1) {
     size_t bsize = 16;
     stdin_buffer = malloc(bsize);
@@ -169,7 +169,7 @@ int main(int argc, char *argv[]) {
     while (!feof(stdin)) {
       // printf("i: %d\n", i);
       // printf("i+bsize: %d\n", i+bsize);
-      char* temp_sb_pt = realloc(stdin_buffer, (size_t) i + bsize);
+      char *temp_sb_pt = realloc(stdin_buffer, (size_t) i + bsize);
       if (temp_sb_pt == NULL) {
         fprintf(stderr, "Could not allocate memory to continue reading");
         break;
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
   }
 
 
-  char* datastr = (datastr_index == -1) ? stdin_buffer : argv[datastr_index];
+  char *datastr = (datastr_index == -1) ? stdin_buffer : argv[datastr_index];
   // printf("%s\n", datastr);
 
   // find number of colons in string: # + 1 = ptcount
@@ -192,10 +192,10 @@ int main(int argc, char *argv[]) {
   }
   ptcount++;
 
-  float* data = (float*)malloc(ptcount * sizeof (float));
-  int* datastem = (int*)malloc(ptcount * sizeof (int));
+  float *data = (float*)malloc(ptcount * sizeof (float));
+  int *datastem = (int*)malloc(ptcount * sizeof (int));
 
-  char* token;
+  char *token;
   float fart = 0;
   token = strtok(datastr, ":");
   for (i = 0; token != NULL; i++){
