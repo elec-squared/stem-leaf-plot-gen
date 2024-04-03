@@ -5,8 +5,6 @@
 #include <string.h>
 #include <math.h>
 
-// latest change: generate legend/key
-// latest tweak: add version
 const char VERSION[] = "v1.6.0";
 
 // output style variables
