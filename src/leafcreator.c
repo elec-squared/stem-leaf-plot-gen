@@ -161,6 +161,7 @@ int main(int argc, char *argv[]) {
       *(ftovar[flag_char - flags]) = 1;
     }
   }
+  di_is_filepath = filepath_valid(argv[datastr_index]);
 
   if (PRINT_HELP) {
     print_help();
@@ -173,30 +174,37 @@ int main(int argc, char *argv[]) {
   }
 
   // if data is not in argument, get from stdin
-  char *stdin_buffer = NULL;
-  if (datastr_index == -1) {
+  // OR if data is filepath, get from file
+  char *filein_buffer = NULL;
+  if (datastr_index == -1 || di_is_filepath) {
     size_t bsize = 16;
-    stdin_buffer = malloc(bsize);
+    filein_buffer = malloc(bsize);
     i = 0; // position in stdin_buffer
-    while (!feof(stdin)) {
+    FILE *input = stdin;
+    if (di_is_filepath) {
+      input = fopen(argv[datastr_index], "r");
+    }
+
+    while (!feof(input)) {
       // printf("i: %d\n", i);
       // printf("i+bsize: %d\n", i+bsize);
-      char *temp_sb_pt = realloc(stdin_buffer, (size_t) i + bsize);
+      char *temp_sb_pt = realloc(filein_buffer, (size_t) i + bsize);
       if (temp_sb_pt == NULL) {
         fprintf(stderr, "Could not allocate memory to continue reading");
         break;
       }
-      stdin_buffer = temp_sb_pt;
+      filein_buffer = temp_sb_pt;
       // printf("sizeof stdin_buffer: %d\n", i+bsize);
       //                 * pointer  addition
-      fread(stdin_buffer + i, bsize, 1, stdin);
+      fread(filein_buffer + i, bsize, 1, input);
       i += bsize;
     }
-  }
+    if (di_is_filepath) fclose(input);
+  } 
 
-
-  char *datastr = (datastr_index == -1) ? stdin_buffer : argv[datastr_index];
-  // printf("%s\n", datastr);
+  char *datastr = (datastr_index == -1 || di_is_filepath)
+    ? filein_buffer : argv[datastr_index];
+  // printf("%d %s\n", di_is_filepath, datastr);
 
   // find number of colons in string: # + 1 = ptcount
   for (i = 0; i < strlen(datastr); i++) {
@@ -294,6 +302,6 @@ int main(int argc, char *argv[]) {
 
   free(data);
   free(datastem);
-  free(stdin_buffer);
+  free(filein_buffer);
   return 0;
 }
