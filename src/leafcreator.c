@@ -5,7 +5,7 @@
 #include <string.h>
 #include <math.h>
 
-const char VERSION[] = "v1.6.0";
+const char VERSION[] = "v1.7.0";
 
 // output style variables
 int RIGHT_TO_LEFT  = 0; // -r
@@ -73,7 +73,9 @@ int cmpfunc_int(const void *a, const void *b) {
 int print_help() {
   printf("stem-leaf plot generator: 23:25 -> 2 | 3 5 ");
   printf("\nusage: slpg [data] options...");
+  printf("\n       slpg [file_path] options...");
   printf("\nsplit elements in data with ':'");
+  printf("\naccepts data from stdin");
   printf("\n-r / --right-to-left        stem on RIGHT and leaves on LEFT");
   printf("\n-n / --no-stem              omit/hide stem in output");
   printf("\n-h / --help                 show help message");
