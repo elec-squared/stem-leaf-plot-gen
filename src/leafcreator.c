@@ -1,9 +1,11 @@
 // SLPG (stem leaf plot generator)
 // Copyright (C) 2024 David Luz
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <unistd.h>
 
 const char VERSION[] = "v1.7.0";
 
@@ -18,6 +20,7 @@ int KEY_NUM       = -1; // -k
 int STEM_NUM_BEGIN = 0; // -s
 // -1: none in args (get from stdin)
 int datastr_index = -1;
+int di_is_filepath = 0;
 int FACTOR        = 10; // -f
 int ptcount        = 0; // formerly -c
 
@@ -94,9 +97,22 @@ int print_ver() {
   return 0;
 }
 
+int filepath_valid(char *fpath) {
+  if (access(fpath, F_OK) == -1) {
+    printf("Could not access %s: %s\n", fpath,
+        strerror(errno));
+    return 0;
+  }
+  return 1;
+}
+
 int main(int argc, char *argv[]) {
   int i, j;
 
+  printf("%d\n",
+      filepath_valid("/home/hawthornemerald/install-the-apps.sh"));
+  printf("%d\n",
+      filepath_valid("asdghpaoiwdhgpoaiwehbfpoiahdcbpoih"));
   for (i = 1; i < argc; i++) {
     if (argv[i][0] != '-') {
       datastr_index = i;
