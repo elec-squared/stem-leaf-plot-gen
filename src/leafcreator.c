@@ -274,11 +274,9 @@ int main(int argc, char *argv[]) {
     printf("Key: ");
     if (!RIGHT_TO_LEFT) printf("%d | ", (int)(KEY_NUM/FACTOR));
     printf(leaf_format_str, fmodf(KEY_NUM, (float)FACTOR));
-    if (RIGHT_TO_LEFT) printf("| %d", (int)(KEY_NUM/FACTOR));
-    printf(" = %d\n", KEY_NUM);
+    if (RIGHT_TO_LEFT) printf("| %d ", (int)(KEY_NUM/FACTOR));
+    printf("= %d\n", KEY_NUM);
   }
-
-  // printf("NOTE: PLEASE check last row for accuracy-- it may contain extra numbers from garbage memory and I can't be bothered to fix it\n");
 
   free(data);
   free(datastem);
