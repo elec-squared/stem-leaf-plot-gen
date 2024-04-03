@@ -99,8 +99,8 @@ int print_ver() {
 
 int filepath_valid(char *fpath) {
   if (access(fpath, F_OK) == -1) {
-    printf("Could not access %s: %s\n", fpath,
-        strerror(errno));
+    // printf("Could not access %s: %s\n", fpath,
+    //  strerror(errno));
     return 0;
   }
   return 1;
@@ -109,10 +109,6 @@ int filepath_valid(char *fpath) {
 int main(int argc, char *argv[]) {
   int i, j;
 
-  printf("%d\n",
-      filepath_valid("/home/hawthornemerald/install-the-apps.sh"));
-  printf("%d\n",
-      filepath_valid("asdghpaoiwdhgpoaiwehbfpoiahdcbpoih"));
   for (i = 1; i < argc; i++) {
     if (argv[i][0] != '-') {
       datastr_index = i;
