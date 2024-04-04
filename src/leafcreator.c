@@ -226,6 +226,19 @@ int main(int argc, char *argv[]) {
   qsort(data, ptcount, sizeof(float), cmpfunc);
   qsort(datastem, ptcount, sizeof(int), cmpfunc_int);
 
+  int leaf_max = 1;
+  int current_leaf_no = 0;
+  // find max amount of leaves any given stem in data set may have
+  // do this post sorting so stem always increases
+  for (i = 1; i < ptcount; i++) {
+    if (datastem[i-1] == datastem[i]) {
+      current_leaf_no++;
+      if (leaf_max < current_leaf_no + 1)
+        leaf_max = current_leaf_no + 1;
+    } else
+      current_leaf_no = 0;
+  }
+
   // print warning if starting stem cuts off data
   if (data[0] < STEM_NUM_BEGIN * FACTOR) {
     fprintf(stderr,
@@ -247,7 +260,7 @@ int main(int argc, char *argv[]) {
     return -1;
   }
   int stem_max = datastem[ptcount-1] - STEM_NUM_BEGIN + 1;
-  int leaf_max = ptcount + 1;
+  // int leaf_max = ptcount + 1;
   float *sl_matrix = (float*)malloc(stem_max
       * leaf_max * sizeof(float));
   for (i = 0; i < stem_max; i++) {
@@ -256,7 +269,7 @@ int main(int argc, char *argv[]) {
     }
   }
   // generate leaves
-  int current_leaf_no = 0;
+  current_leaf_no = 0;
   for (i = 0; i < ptcount; i++) {
     sl_matrix[(datastem[i] - STEM_NUM_BEGIN)*leaf_max + current_leaf_no]
       = fmodf(data[i], (float)FACTOR); // data[i] % FACTOR
