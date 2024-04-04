@@ -1,6 +1,5 @@
 // SLPG (stem leaf plot generator)
 // Copyright (C) 2024 David Luz
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -99,8 +98,6 @@ int print_ver() {
 
 int filepath_valid(char *fpath) {
   if (access(fpath, F_OK) == -1) {
-    // printf("Could not access %s: %s\n", fpath,
-    //  strerror(errno));
     return 0;
   }
   return 1;
@@ -226,7 +223,6 @@ int main(int argc, char *argv[]) {
   }
   ptcount = i;
 
-  // printf("Sorting... ");
   qsort(data, ptcount, sizeof(float), cmpfunc);
   qsort(datastem, ptcount, sizeof(int), cmpfunc_int);
 
@@ -241,28 +237,36 @@ int main(int argc, char *argv[]) {
   // e.g. with stem_num_begin as 2
   // 0(2) | 1.0 2.1 3.0
   // 1(3) | 4.0 4.1 5.2
-  // stem_num_begin -> maxstem (below applied stem_num_begin offset to start at 0)
+  // stem_num_begin -> maxstem
   // i iterates 0 -> maxstem - stem_num_begin
+  // stored continuously:
+  // 1.0 2.1 3.0 - - - 4.0 4.1 5.2 - - -
   if (FACTOR < 10) { // cannot continue as log10(FACTOR) would be less than 1
                      // see code further ahead
     fprintf(stderr, "ERROR: Factor is less than 10, aborting\n");
     return -1;
   }
-  float sl_matrix[datastem[ptcount-1]+1][ptcount];
-  for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
-    for (j = 0; j < ptcount; j++){
-      sl_matrix[i][j] = -1.0;
+  int stem_max = datastem[ptcount-1] - STEM_NUM_BEGIN + 1;
+  int leaf_max = ptcount + 1;
+  float *sl_matrix = (float*)malloc(stem_max
+      * leaf_max * sizeof(float));
+  for (i = 0; i < stem_max; i++) {
+    for (j = 0; j < leaf_max; j++){
+      sl_matrix[i * leaf_max + j] = -1.0;
     }
   }
+  // generate leaves
   int current_leaf_no = 0;
   for (i = 0; i < ptcount; i++) {
-    sl_matrix[datastem[i] - STEM_NUM_BEGIN][current_leaf_no]
-      = fmodf(data[i], (float)FACTOR);
+    sl_matrix[(datastem[i] - STEM_NUM_BEGIN)*leaf_max + current_leaf_no]
+      = fmodf(data[i], (float)FACTOR); // data[i] % FACTOR
     if (i < ptcount-1) {
       if (datastem[i+1]==datastem[i]) current_leaf_no++;
       else current_leaf_no = 0;
     }
   }
+  free(data);
+  free(datastem);
 
   // e.g. for factor 100, need 2 digits: 1 | 00 02 04
   // %x.yf:
@@ -274,19 +278,18 @@ int main(int argc, char *argv[]) {
     + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
 
   // ternary bool ? r-l : l-r
-  for (i = 0; i <= datastem[ptcount-1] - STEM_NUM_BEGIN; i++) {
+  for (i = 0; i < stem_max; i++) {
     if (!NO_STEM && !RIGHT_TO_LEFT) printf("%d | ", i + STEM_NUM_BEGIN);
-//         (right_to_left ? ptcount-1 : 0)
-    for (j = (ptcount-1)*RIGHT_TO_LEFT;
-      RIGHT_TO_LEFT ? j >= 0 : j < ptcount;
-//         (right_to_left ? -1 : 1)
-      j += 1 - 2*RIGHT_TO_LEFT) {
-      if (sl_matrix[i][j] < FACTOR && sl_matrix[i][j] >= 0) {
+    for (j = RIGHT_TO_LEFT ? leaf_max - 1 : 0;
+      RIGHT_TO_LEFT ? j >= 0 : j < leaf_max;
+      j += RIGHT_TO_LEFT ? -1 : 1) {
+      if (sl_matrix[i * leaf_max + j] < FACTOR
+          && sl_matrix[i * leaf_max + j] >= 0) {
         sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + PRINT_DEC*2, PRINT_DEC);
-        printf(leaf_format_str, sl_matrix[i][j]);
+        printf(leaf_format_str, sl_matrix[i * leaf_max + j]);
       }
     }
-    // "| %d" NOT " | %d" because the leafs printed will have a trailing space
+    // "| %d" NOT " | %d" because the leaves printed will have a trailing space
     if (!NO_STEM && RIGHT_TO_LEFT) printf("| %d", i + STEM_NUM_BEGIN);
     printf("\n");
   }
@@ -300,8 +303,7 @@ int main(int argc, char *argv[]) {
     printf("= %d\n", KEY_NUM);
   }
 
-  free(data);
-  free(datastem);
+  free(sl_matrix);
   free(filein_buffer);
   return 0;
 }
