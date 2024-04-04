@@ -6,7 +6,7 @@
 #include <math.h>
 #include <unistd.h>
 
-const char VERSION[] = "v1.7.0";
+const char VERSION[] = "v1.7.1";
 
 // output style variables
 int RIGHT_TO_LEFT  = 0; // -r
