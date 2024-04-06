@@ -228,7 +228,7 @@ int main(int argc, char *argv[]) {
 
   int leaf_max = 1;
   int current_leaf_no = 0;
-  // find max amount of leaves any given stem in data set may have
+  // find max number of leaves among stems in data
   // do this post sorting so stem always increases
   for (i = 1; i < ptcount; i++) {
     if (datastem[i-1] == datastem[i]) {
