@@ -73,19 +73,21 @@ int cmpfunc_int(const void *a, const void *b) {
 }
 
 int print_help() {
-  printf("stem-leaf plot generator: 23:25 -> 2 | 3 5 ");
+  printf(  "stem-leaf plot generator: 23:25 -> 2 | 3 5");
+  printf("\n  Separate each data point in data set with ':'\n");
   printf("\nusage: slpg [data] options...");
-  printf("\n       slpg [file_path] options...");
-  printf("\nsplit elements in data with ':'");
-  printf("\naccepts data from stdin");
-  printf("\n-r / --right-to-left        stem on RIGHT and leaves on LEFT");
-  printf("\n-n / --no-stem              omit/hide stem in output");
-  printf("\n-h / --help                 show help message");
-  printf("\n-v / --version              print version information");
-  printf("\n-d / --decimal              format leaf values as decimal (e.g. 2 | 1.2)");
-  printf("\n-k / --key [sample num]     print a key at the end (e.g. Key: 1 | 2 = 12)");
-  printf("\n-f / --factor [num]         change factor of stem (e.g. 10: tens place in stem)");
-  printf("\n-s / --starting-stem [num]  change starting stem\n");
+  printf("\n       slpg [file_path] options...\n");
+  printf("\n-r, --right-to-left        stem on RIGHT and leaves on LEFT");
+  printf("\n-n, --no-stem              omit stem in output");
+  printf("\n-h, --help                 show help message");
+  printf("\n-v, --version              print version information");
+  printf("\n-d, --decimal              format leaf values as decimal");
+  printf("\n                             (e.g. 2 | 1.2)");
+  printf("\n-k, --key [sample num]     print a key at the end");
+  printf("\n                             (e.g. Key: 1 | 2 = 12)");
+  printf("\n-f, --factor [num]         change factor of stem");
+  printf("\n                             (e.g. 10: tens place in stem)");
+  printf("\n-s, --starting-stem [num]  change starting stem\n");
   return 0;
 }
 
@@ -247,13 +249,13 @@ int main(int argc, char *argv[]) {
   }
 
   // generate stem-leaf matrix: [stem][leafindex]
-  // e.g. with stem_num_begin as 2
-  // 0(2) | 1.0 2.1 3.0
+  // > with stem_num_begin as 2:
+  // 0(2) | 1.0 2.1
   // 1(3) | 4.0 4.1 5.2
-  // stem_num_begin -> maxstem
-  // i iterates 0 -> maxstem - stem_num_begin
+  //   stem_num_begin -> maxstem
+  //   i iterates   0 -> maxstem-stem_num_begin
   // stored continuously:
-  // 1.0 2.1 3.0 - - - 4.0 4.1 5.2 - - -
+  //   1.0 2.1 - 4.0 4.1 5.2
   if (FACTOR < 10) { // cannot continue as log10(FACTOR) would be less than 1
                      // see code further ahead
     fprintf(stderr, "ERROR: Factor is less than 10, aborting\n");
@@ -283,9 +285,11 @@ int main(int argc, char *argv[]) {
 
   // e.g. for factor 100, need 2 digits: 1 | 00 02 04
   // %x.yf:
-  // x is total digits (all digits left of decimal point, the point itself, all digits right of point)
-  // x = leaf_digits + print_dec (if there is a decimal point) + print_dec (if there is decimal)
-  // x = print_dec * 2
+  //   x is total digits (all digits left of decimal point, the point itself,
+  //     all digits right of point)
+  //   x = leaf_digits + print_dec (if there is a decimal point)
+  //     + print_dec (if there is decimal)
+  //   x = leaf_digits + print_dec * 2
   int leaf_digits = (int)log10(FACTOR);
   char leaf_format_str[strlen("%.?f ")
     + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
@@ -298,7 +302,8 @@ int main(int argc, char *argv[]) {
       j += RIGHT_TO_LEFT ? -1 : 1) {
       if (sl_matrix[i * leaf_max + j] < FACTOR
           && sl_matrix[i * leaf_max + j] >= 0) {
-        sprintf(leaf_format_str, "%%0%d.%df ", leaf_digits + PRINT_DEC*2, PRINT_DEC);
+        sprintf(leaf_format_str, "%%0%d.%df ",
+            leaf_digits + PRINT_DEC*2, PRINT_DEC);
         printf(leaf_format_str, sl_matrix[i * leaf_max + j]);
       }
     }
