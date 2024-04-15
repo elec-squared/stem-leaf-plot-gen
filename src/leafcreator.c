@@ -19,6 +19,7 @@ int KEY_NUM       = -1; // -k
 int STEM_NUM_BEGIN = 0; // -s
 // -1: none in args (get from stdin)
 int datastr_index = -1;
+int stop_proc_opt  = 0; // --
 int di_is_filepath = 0;
 int FACTOR        = 10; // -f
 int ptcount        = 0; // formerly -c
@@ -116,6 +117,12 @@ int main(int argc, char *argv[]) {
       continue; // i's for loop
     }
 
+    if (strcmp("--", argv[i]) == 0) {
+      stop_proc_opt = 1;
+      continue;
+    }
+    if (stop_proc_opt) continue;
+
     if (strlen(argv[i]) < 2) {
       fprintf(stderr, "Invalid option at index %d\n", i);
       continue; // i's for loop
@@ -141,6 +148,7 @@ int main(int argc, char *argv[]) {
       continue; // done with this arg; i's for loop
     } else if (opt_char != NULL) { // option with one char
       if (i+1 >= argc
+          // already covers double dash case. Nice
           || argv[i+1][0] == '-') {
         fprintf(stderr, "Value expected for \"%s\", none found\n", argv[i]);
         continue; // i's for loop
