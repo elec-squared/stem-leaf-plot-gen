@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
   int i, j;
 
   for (i = 1; i < argc; i++) {
-    if (argv[i][0] != '-') {
+    if (argv[i][0] != '-' || stop_proc_opt) {
       datastr_index = i;
       continue; // i's for loop
     }
