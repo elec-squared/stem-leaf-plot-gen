@@ -6,7 +6,7 @@
 #include <math.h>
 #include <unistd.h>
 
-const char VERSION[] = "v1.7.1";
+const char VERSION[] = "v1.7.2";
 
 // output style variables
 int RIGHT_TO_LEFT  = 0; // -r
@@ -77,6 +77,8 @@ int print_help() {
   printf("\n  Separate each data point in data set with ':'\n");
   printf("\nusage: slpg [data] options...");
   printf("\n       slpg [file_path] options...\n");
+  printf("\ndouble dash (--) indicates end of options");
+  printf("\n  treated as file path or data");
   printf("\n-r, --right-to-left        stem on RIGHT and leaves on LEFT");
   printf("\n-n, --no-stem              omit stem in output");
   printf("\n-h, --help                 show help message");
