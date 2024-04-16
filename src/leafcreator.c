@@ -79,7 +79,7 @@ int print_help() {
   printf("\nusage: slpg [data] options...");
   printf("\n       slpg [file_path] options...\n");
   printf("\ndouble dash (--) indicates end of options");
-  printf("\n  treated as file path or data");
+  printf("\n  all following args are treated as file path or data");
   printf("\n-r, --right-to-left        stem on RIGHT and leaves on LEFT");
   printf("\n-n, --no-stem              omit stem in output");
   printf("\n-h, --help                 show help message");
