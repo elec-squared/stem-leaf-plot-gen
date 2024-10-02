@@ -239,7 +239,6 @@ int main(int argc, char *argv[]) {
     data[i] = fart;
     datastem[i] = (int)(fart / FACTOR);
     token = strtok(NULL, ":");
-    printf("data: %f, %i\n", data[i], datastem[i]);
   }
   ptcount = i;
 
@@ -298,7 +297,6 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < ptcount; i++) {
     sl_matrix[(datastem[i] - STEM_NUM_BEGIN)*leaf_max + current_leaf_no]
       = remainder(data[i], (float)FACTOR); // data[i] % FACTOR
-    printf("%f\n", remainder(data[i], (float)FACTOR));
     if (i < ptcount-1) {
       if (datastem[i+1]==datastem[i]) current_leaf_no++;
       else current_leaf_no = 0;
