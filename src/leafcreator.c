@@ -5,6 +5,7 @@
 #include <string.h>
 #include <math.h>
 #include <unistd.h>
+#include <ctype.h>
 
 const char VERSION[] = "v1.7.2";
 
@@ -115,6 +116,12 @@ int main(int argc, char *argv[]) {
     if (argv[i][0] != '-' || stop_proc_opt) {
       datastr_index = i;
       continue; // i's for loop
+    }
+    
+    // if is number
+    if (isdigit(argv[i][1]) > 0) {
+      datastr_index = i;
+      continue; // don't continue parsing as arg; i's for loop
     }
 
     if (strcmp("--", argv[i]) == 0) {
@@ -232,6 +239,7 @@ int main(int argc, char *argv[]) {
     data[i] = fart;
     datastem[i] = (int)(fart / FACTOR);
     token = strtok(NULL, ":");
+    printf("data: %f, %i\n", data[i], datastem[i]);
   }
   ptcount = i;
 
@@ -239,6 +247,7 @@ int main(int argc, char *argv[]) {
   qsort(datastem, ptcount, sizeof(int), cmpfunc_int);
 
   int leaf_max = 1;
+  float data_min = data[0];
   int current_leaf_no = 0;
   // find max number of leaves among stems in data
   // do this post sorting so stem always increases
@@ -250,12 +259,16 @@ int main(int argc, char *argv[]) {
     } else
       current_leaf_no = 0;
   }
+  
+  // if STEM_NUM_BEGIN not explicitly defined, set it for lowest number
+  // (includes negative number support). remember list is sorted
 
   // print warning if starting stem cuts off data
-  if (data[0] < STEM_NUM_BEGIN * FACTOR) {
+  if (data[0] < STEM_NUM_BEGIN * -FACTOR) {
     fprintf(stderr,
         "WARNING: smallest data point %.1f is lower than minimum %d\n",
-        data[0], STEM_NUM_BEGIN*FACTOR);
+        data[0], STEM_NUM_BEGIN* -FACTOR);
+    STEM_NUM_BEGIN = datastem[0];
   }
 
   // generate stem-leaf matrix: [stem][leafindex]
@@ -277,14 +290,15 @@ int main(int argc, char *argv[]) {
       * leaf_max * sizeof(float));
   for (i = 0; i < stem_max; i++) {
     for (j = 0; j < leaf_max; j++){
-      sl_matrix[i * leaf_max + j] = -1.0;
+      sl_matrix[i * leaf_max + j] = -999999999999.93513;
     }
   }
   // generate leaves
   current_leaf_no = 0;
   for (i = 0; i < ptcount; i++) {
     sl_matrix[(datastem[i] - STEM_NUM_BEGIN)*leaf_max + current_leaf_no]
-      = fmodf(data[i], (float)FACTOR); // data[i] % FACTOR
+      = remainder(data[i], (float)FACTOR); // data[i] % FACTOR
+    printf("%f\n", remainder(data[i], (float)FACTOR));
     if (i < ptcount-1) {
       if (datastem[i+1]==datastem[i]) current_leaf_no++;
       else current_leaf_no = 0;
@@ -310,8 +324,8 @@ int main(int argc, char *argv[]) {
     for (j = RIGHT_TO_LEFT ? leaf_max - 1 : 0;
       RIGHT_TO_LEFT ? j >= 0 : j < leaf_max;
       j += RIGHT_TO_LEFT ? -1 : 1) {
-      if (sl_matrix[i * leaf_max + j] < FACTOR
-          && sl_matrix[i * leaf_max + j] >= 0) {
+      if (fabs(sl_matrix[i * leaf_max + j]) < FACTOR
+          && fabs(sl_matrix[i * leaf_max + j]) >= 0) {
         sprintf(leaf_format_str, "%%0%d.%df ",
             leaf_digits + PRINT_DEC*2, PRINT_DEC);
         printf(leaf_format_str, sl_matrix[i * leaf_max + j]);
