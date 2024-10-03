@@ -332,11 +332,12 @@ int main(int argc, char *argv[]) {
     for (j = RIGHT_TO_LEFT ? leaf_max - 1 : 0;
       RIGHT_TO_LEFT ? j >= 0 : j < leaf_max;
       j += RIGHT_TO_LEFT ? -1 : 1) {
-      if (fabs(sl_matrix[i * leaf_max + j]) < FACTOR
-          && fabs(sl_matrix[i * leaf_max + j]) >= 0) {
+      float leaf = sl_matrix[i * leaf_max + j];
+      if (fabs(leaf) < FACTOR
+          && fabs(leaf) >= 0) {
         sprintf(leaf_format_str, "%%0%d.%df ",
             leaf_digits + PRINT_DEC*2, PRINT_DEC);
-        printf(leaf_format_str, sl_matrix[i * leaf_max + j]);
+        printf(leaf_format_str, (i+STEM_NUM_BEGIN==0?leaf:fabs(leaf)));
       }
     }
     // "| %d" NOT " | %d" because the leaves printed will have a trailing space
