@@ -74,16 +74,6 @@ int cmpfunc_int(const void *a, const void *b) {
   return ( *(int*)a - *(int*)b );
 }
 
-/**
- * Euclidean modulo for floats (remainder always positive.) 
- *
- */
-float eucmodf(float a, float b) {
-  float quotient_floor = floor((double)(a/b));
-  float diff = a/b - quotient_floor;
-  return diff*b;
-}
-
 int print_help() {
   printf(  "stem-leaf plot generator: 23:25 -> 2 | 3 5");
   printf("\n  Separate each data point in data set with ':'\n");
