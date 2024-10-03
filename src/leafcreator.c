@@ -349,6 +349,7 @@ int main(int argc, char *argv[]) {
   if (KEY_NUM >= 0) {
     printf("Key: ");
     if (!RIGHT_TO_LEFT) printf("%d | ", (int)(KEY_NUM/FACTOR));
+    // TODO: fix key to follow negative stem/leaf behavior
     printf(leaf_format_str, fmodf(KEY_NUM, (float)FACTOR));
     if (RIGHT_TO_LEFT) printf("| %d ", (int)(KEY_NUM/FACTOR));
     printf("= %d\n", KEY_NUM);
