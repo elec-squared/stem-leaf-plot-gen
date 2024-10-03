@@ -306,7 +306,7 @@ int main(int argc, char *argv[]) {
   current_leaf_no = 0;
   for (i = 0; i < ptcount; i++) {
     sl_matrix[(datastem[i] - STEM_NUM_BEGIN)*leaf_max + current_leaf_no]
-      = eucmodf(data[i], (float)FACTOR); // data[i] % FACTOR
+      = fmodf(data[i], (float)FACTOR); // data[i] % FACTOR
     if (i < ptcount-1) {
       if (datastem[i+1]==datastem[i]) current_leaf_no++;
       else current_leaf_no = 0;
