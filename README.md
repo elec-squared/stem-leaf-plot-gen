@@ -3,7 +3,7 @@ little thing for math class because I do not want to write those numbers by hand
 edit: this is now a side project that I work on occasionally (the next time we do statistics in math I need a good stem leaf plot application!!)
 
 INPUT: numbers separated with `:`. By default, it uses the tens place as stem but can be changed with `-f [number]` (f for factor).
-To make for those goofy two-sided stem leaf plots, you can generate one side then the other by including `-r -n` in the arguments to generate right to left and to hide stem (no stem). Then, join both together in another application.
+To make two-sided stem leaf plots, you can generate one side then the other by including `-r -n` in the arguments to generate right to left and to hide stem (no stem). Then, join both together in another application.
 
 Accepts the data set as one of the arguments or through stdin (if none in args found). The data set given to the app can be unsorted.
 
