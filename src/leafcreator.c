@@ -316,22 +316,38 @@ int main(int argc, char *argv[]) {
   char leaf_format_str[strlen("%.?f ")
     + (int)log10(leaf_digits) /*1 -> 1, 10 -> 2*/];
 
+  // If the lowest data point is negative, then we need to split 0 stem into
+  // positive and negative
+  int HAS_NEGATIVE = 0;
+  int SPLIT_ZERO = 0; // -1 is -0; 1 is 0
+  if (data[0] < 0) HAS_NEGATIVE = 1, SPLIT_ZERO = -1;
+
   // ternary bool ? r-l : l-r
   for (i = 0; i < stem_max; i++) {
-    if (!NO_STEM && !RIGHT_TO_LEFT) printf("%d | ", i + STEM_NUM_BEGIN);
+    int stem = i + STEM_NUM_BEGIN;
+    if (stem == 1 && SPLIT_ZERO < 0) {
+      stem--; i--;
+      SPLIT_ZERO = 1;
+    }
+    if (!NO_STEM && !RIGHT_TO_LEFT) {
+      printf(SPLIT_ZERO<0?"-%d | ":"%d | ", abs(stem));
+    }
     for (j = RIGHT_TO_LEFT ? leaf_max - 1 : 0;
       RIGHT_TO_LEFT ? j >= 0 : j < leaf_max;
       j += RIGHT_TO_LEFT ? -1 : 1) {
       float leaf = sl_matrix[i * leaf_max + j];
-      if (fabs(leaf) < FACTOR
-          && fabs(leaf) >= 0) {
+      if (fabs(leaf) < FACTOR && (leaf >= 0 || stem == 0)) {
+        if (stem == 0) {
+          if (leaf * SPLIT_ZERO < 0) // if the leaf is in wrong sign of stem 0
+            {continue;}
+        }
         sprintf(leaf_format_str, "%%0%d.%df ",
             leaf_digits + PRINT_DEC*2, PRINT_DEC);
-        printf(leaf_format_str, (i+STEM_NUM_BEGIN==0?leaf:fabs(leaf)));
+        printf(leaf_format_str, fabs(leaf));
       }
     }
     // "| %d" NOT " | %d" because the leaves printed will have a trailing space
-    if (!NO_STEM && RIGHT_TO_LEFT) printf("| %d", i + STEM_NUM_BEGIN);
+    if (!NO_STEM && RIGHT_TO_LEFT) printf(SPLIT_ZERO<0?"| -%d":"| %d", abs(stem)); 
     printf("\n");
   }
 
