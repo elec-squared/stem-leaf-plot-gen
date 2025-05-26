@@ -320,7 +320,7 @@ int main(int argc, char *argv[]) {
   // positive and negative
   int HAS_NEGATIVE = 0;
   int SPLIT_ZERO = 0; // -1 is -0; 1 is 0
-  if (data[0] < 0) HAS_NEGATIVE = 1, SPLIT_ZERO = -1;
+  if (data_min < 0) HAS_NEGATIVE = 1, SPLIT_ZERO = -1;
 
   // ternary bool ? r-l : l-r
   for (i = 0; i < stem_max; i++) {
@@ -336,10 +336,10 @@ int main(int argc, char *argv[]) {
       RIGHT_TO_LEFT ? j >= 0 : j < leaf_max;
       j += RIGHT_TO_LEFT ? -1 : 1) {
       float leaf = sl_matrix[i * leaf_max + j];
-      if (fabs(leaf) < FACTOR && (leaf >= 0 || stem == 0)) {
+      if (fabs(leaf) < FACTOR && (leaf*SPLIT_ZERO >= 0 || stem == 0)) {
         if (stem == 0) {
-          if (leaf * SPLIT_ZERO < 0) // if the leaf is in wrong sign of stem 0
-            {continue;}
+      //  if (leaf * SPLIT_ZERO < 0) // if the leaf is in wrong sign of stem 0
+      //    {continue;}
         }
         sprintf(leaf_format_str, "%%0%d.%df ",
             leaf_digits + PRINT_DEC*2, PRINT_DEC);
