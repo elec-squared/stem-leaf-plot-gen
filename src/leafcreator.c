@@ -338,8 +338,8 @@ int main(int argc, char *argv[]) {
       float leaf = sl_matrix[i * leaf_max + j];
       if (fabs(leaf) < FACTOR && (leaf*SPLIT_ZERO >= 0 || stem == 0)) {
         if (stem == 0) {
-      //  if (leaf * SPLIT_ZERO < 0) // if the leaf is in wrong sign of stem 0
-      //    {continue;}
+          if (leaf * SPLIT_ZERO < 0) // if the leaf is in wrong sign of stem 0
+            {continue;}
         }
         sprintf(leaf_format_str, "%%0%d.%df ",
             leaf_digits + PRINT_DEC*2, PRINT_DEC);
